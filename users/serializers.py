@@ -8,7 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ('id', 'email', 'password',) + tuple(models.User.REQUIRED_FIELDS)
+        fields = ('id', 'email', 'password',) + \
+            tuple(models.User.REQUIRED_FIELDS)
         read_only_fields = ('id',)
         extra_kwargs = {
             'password': {
