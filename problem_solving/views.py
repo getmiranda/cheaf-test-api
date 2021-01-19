@@ -54,23 +54,29 @@ def distance_two_points(request):
     Receives 2 Lat-Long geo-coordinates and returns the distance
     between these two points.
     """
-    point1 = request.data.get(
-        'point1', {'latitude': 41.490080, 'longitude': -71.312790}
-    )
-    point2 = request.data.get(
-        'point2', {'latitude': 19.624189, 'longitude': -103.421401}
-    )
 
-    distance = geodesic(point1.values(), point2.values()).kilometers
-    geolocator = Nominatim(user_agent="cheaf-api")
+    if 'point1' in request.data and 'point2' in request.data:
+        point1 = request.data['point1']
+        point2 = request.data['point2']
 
-    address_1 = geolocator.reverse(point1.values())
-    address_2 = geolocator.reverse(point2.values())
+        try:
+            distance = geodesic(point1.values(), point2.values()).kilometers
+            geolocator = Nominatim(user_agent="cheaf-api")
 
-    response = {
-        'distance': '{:.2f} kilometers'.format(distance),
-        'point1_address': address_1.address if address_1 else 'You are at sea',
-        'point2_address': address_2.address if address_2 else 'You are at sea'
-    }
+            address_1 = geolocator.reverse(point1.values())
+            address_2 = geolocator.reverse(point2.values())
 
-    return Response(status=status.HTTP_200_OK, data=response)
+            response = {
+                'distance': '{:.2f} kilometers'.format(distance),
+                'point1': address_1.address if address_1 else 'You are at sea',
+                'point2': address_2.address if address_2 else 'You are at sea'
+            }
+
+            return Response(status=status.HTTP_200_OK, data=response)
+        except Exception as error:
+            print(f'EXCEPTION: {error}')
+            response = {'error': str(error)}
+    else:
+        response = {'error': 'Invalid params'}
+
+    return Response(status=status.HTTP_400_BAD_REQUEST, data=response)
